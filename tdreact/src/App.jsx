@@ -74,6 +74,35 @@ function RandomItem({ item }) {
   );
 }
 
+function Menu() {
+  const handleClick = (text) => {
+    alert(`Vous avez cliqué sur : ${text}`);
+  };
+
+  return (
+    <nav style={{ position: "absolute", top: 0, left: 0, padding: "10px" }}>
+      <ul style={{ listStyleType: "none", padding: 0 }}>
+        {["Notes", "Etudiants", "Matières", "A propos"].map((item) => (
+          <li key={item} style={{ margin: "10px 0" }}>
+            <button
+              style={{
+                backgroundColor: "#007BFF",
+                color: "white",
+                border: "none",
+                padding: "8px 16px",
+                cursor: "pointer",
+              }}
+              onClick={() => handleClick(item)}
+            >
+              {item}
+            </button>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  );
+}
+
 function App() {
   const [data, setData] = useState([]);
   const [randomItem, setRandomItem] = useState(null);
@@ -101,6 +130,7 @@ function App() {
 
   return (
     <>
+      <Menu />
       <Header />
       <MainContent />
       <div>
