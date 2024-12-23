@@ -6,6 +6,10 @@ import "./App.css";
 function MainContent() {
   return <p> Ici, nous afficherons des informations interessantes :)</p>;
 }
+
+function Footer() {
+  return <p>Tous droits réservés - EL KARROUSSI Ayman</p>;
+}
 function Header() {
   return (
     <header>
@@ -47,6 +51,7 @@ function App() {
       <p className="read-the-docs">
         Click on the Vite and React logos to learn more
       </p>
+      <Footer />
     </>
   );
 }
