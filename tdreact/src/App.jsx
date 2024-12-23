@@ -42,6 +42,7 @@ function Footer() {
     </p>
   );
 }
+
 function Header() {
   return (
     <header>
@@ -49,40 +50,72 @@ function Header() {
         src="https://emsi.ma/wp-content/uploads/2020/07/logo.png"
         alt="Logo Emsi"
         style={{ width: "100%", maxWidth: "300px", height: "auto" }}
-      ></img>
+      />
       <h1>Introduction à React</h1>
       <h2>A la découverte des premières notions de React</h2>
     </header>
   );
 }
 
+function RandomItem({ item }) {
+  if (!item) return <p>Chargement...</p>;
+
+  return (
+    <div style={{ border: "1px solid #ccc", padding: "16px", margin: "16px" }}>
+      <h2>
+        Étudiant: {item.student.firstname} {item.student.lastname} (ID:{" "}
+        {item.student.id})
+      </h2>
+      <h3>{item.course}</h3>
+
+      <p>Date: {item.date}</p>
+      <p>Note: {item.grade}</p>
+    </div>
+  );
+}
+
 function App() {
-  const [count, setCount] = useState(0);
+  const [data, setData] = useState([]);
+  const [randomItem, setRandomItem] = useState(null);
+
+  useEffect(() => {
+    fetch("/data.json")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to load data");
+        }
+        return response.json();
+      })
+      .then((jsonData) => setData(jsonData))
+      .catch((error) =>
+        console.error("Erreur lors du chargement des données:", error)
+      );
+  }, []);
+
+  const pickRandomItem = () => {
+    if (data.length > 0) {
+      const randomIndex = Math.floor(Math.random() * data.length);
+      setRandomItem(data[randomIndex]);
+    }
+  };
 
   return (
     <>
       <Header />
       <MainContent />
       <div>
-        <a href="https://vite.dev" target="_blank">
+        <a href="https://vite.dev" target="_blank" rel="noreferrer">
           <img src={viteLogo} className="logo" alt="Vite logo" />
         </a>
-        <a href="https://react.dev" target="_blank">
+        <a href="https://react.dev" target="_blank" rel="noreferrer">
           <img src={reactLogo} className="logo react" alt="React logo" />
         </a>
       </div>
       <h1>Ayman EL KARROUSSI Using Vite + React</h1>
       <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
+        <button onClick={pickRandomItem}>Afficher un élément aléatoire</button>
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <RandomItem item={randomItem} />
       <Footer />
     </>
   );
