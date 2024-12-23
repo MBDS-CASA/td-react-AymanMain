@@ -33,7 +33,14 @@ function MainContent() {
 }
 
 function Footer() {
-  return <p>Tous droits réservés - EL KARROUSSI Ayman</p>;
+  const currentYear = new Date().getFullYear();
+  const authorName = "Ayman EL KARROUSSI";
+
+  return (
+    <p>
+      © {currentYear} - {authorName}, Tous droits réservés
+    </p>
+  );
 }
 function Header() {
   return (
