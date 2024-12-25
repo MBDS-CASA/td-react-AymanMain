@@ -16,7 +16,9 @@ function MainContent() {
       setCurrentDate(new Date());
     }, 1000);
 
-    return () => clearInterval(timer);
+    return () => {
+      clearInterval(timer);
+    };
   }, []);
 
   const options = {
@@ -25,7 +27,6 @@ function MainContent() {
     month: "long",
     day: "numeric",
   };
-
   const dateString = currentDate.toLocaleDateString("fr-FR", options);
   const timeString = currentDate.toLocaleTimeString("fr-FR");
 
@@ -42,7 +43,7 @@ function Footer() {
 
   return (
     <p>
-      © {currentYear} - {authorName}, Tous droits réservés
+      © {currentYear} - {authorName}, Tous droits réservés.
     </p>
   );
 }
@@ -58,22 +59,6 @@ function Header() {
       <h1>Introduction à React</h1>
       <h2>A la découverte des premières notions de React</h2>
     </header>
-  );
-}
-
-function RandomItem({ item }) {
-  if (!item) return <p>Sélectionnez un élément au hasard...</p>;
-
-  return (
-    <div style={{ border: "1px solid #ccc", padding: "16px", margin: "16px" }}>
-      <h2>
-        Étudiant: {item.student.firstname} {item.student.lastname} (ID:{" "}
-        {item.student.id})
-      </h2>
-      <h3>{item.course}</h3>
-      <p>Date: {item.date}</p>
-      <p>Note: {item.grade}</p>
-    </div>
   );
 }
 
@@ -110,10 +95,41 @@ function Menu({ onMenuChange }) {
   );
 }
 
-function Notes({ data }) {
-  if (!data || data.length === 0) {
-    return <p>Chargement des données ou aucune donnée disponible.</p>;
-  }
+const Notes = ({ data }) => (
+  <TableContainer
+    component={Paper}
+    style={{ margin: "20px auto", width: "80%" }}
+  >
+    <Table>
+      <TableHead>
+        <TableRow>
+          <TableCell>ID</TableCell>
+          <TableCell>Nom de l'Étudiant</TableCell>
+          <TableCell>Matière</TableCell>
+          <TableCell>Date</TableCell>
+          <TableCell>Note</TableCell>
+        </TableRow>
+      </TableHead>
+      <TableBody>
+        {data.map((item) => (
+          <TableRow key={item.unique_id}>
+            <TableCell>{item.unique_id}</TableCell>
+            <TableCell>{`${item.student.firstname} ${item.student.lastname}`}</TableCell>
+            <TableCell>{item.course}</TableCell>
+            <TableCell>{item.date}</TableCell>
+            <TableCell>{item.grade}</TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  </TableContainer>
+);
+
+// Composants de base pour les autres sections
+const Etudiants = ({ data }) => {
+  const students = Array.from(
+    new Map(data.map((item) => [item.student.id, item.student])).values()
+  );
 
   return (
     <TableContainer
@@ -124,61 +140,68 @@ function Notes({ data }) {
         <TableHead>
           <TableRow>
             <TableCell>ID</TableCell>
-            <TableCell>Nom de l'étudiant</TableCell>
-            <TableCell>Cours</TableCell>
-            <TableCell>Date</TableCell>
-            <TableCell>Note</TableCell>
+            <TableCell>Prénom</TableCell>
+            <TableCell>Nom</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
-          {data.map((item) => (
-            <TableRow key={item.unique_id}>
-              <TableCell>{item.unique_id}</TableCell>
-              <TableCell>
-                {`${item.student.firstname} ${item.student.lastname}`}
-              </TableCell>
-              <TableCell>{item.course}</TableCell>
-              <TableCell>{item.date}</TableCell>
-              <TableCell>{item.grade}</TableCell>
+          {students.map((student) => (
+            <TableRow key={student.id}>
+              <TableCell>{student.id}</TableCell>
+              <TableCell>{student.firstname}</TableCell>
+              <TableCell>{student.lastname}</TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
     </TableContainer>
   );
-}
+};
 
-function Etudiants() {
-  return <h2>Composant Etudiants</h2>;
-}
+const Matieres = ({ data }) => {
+  if (!data || data.length === 0) {
+    return <p style={{ textAlign: "center" }}>Aucune matière disponible.</p>;
+  }
 
-function Matieres() {
-  return <h2>Composant Matières</h2>;
-}
+  const courses = Array.from(new Set(data.map((item) => item.course)));
 
-function APropos() {
-  return <h2>Composant A Propos</h2>;
-}
+  return (
+    <TableContainer
+      component={Paper}
+      style={{ margin: "20px auto", width: "80%" }}
+    >
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell>Matières</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {courses.map((course, index) => (
+            <TableRow key={index}>
+              <TableCell>{course}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+};
+
+const APropos = () => (
+  <div style={{ margin: "20px auto", width: "80%" }}>
+    <h2>À Propos</h2>
+    <p>
+      Cette application React a été développée pour illustrer les concepts
+      fondamentaux de React.
+    </p>
+    <p>Auteur : Ayman EL KARROUSSI. Merci de votre visite !</p>
+  </div>
+);
 
 function App() {
   const [data, setData] = useState([]);
-  const [randomItem, setRandomItem] = useState(null);
   const [activeMenu, setActiveMenu] = useState("Notes");
-
-  const renderContent = () => {
-    switch (activeMenu) {
-      case "Notes":
-        return <Notes data={data} />;
-      case "Etudiants":
-        return <Etudiants />;
-      case "Matières":
-        return <Matieres />;
-      case "A propos":
-        return <APropos />;
-      default:
-        return null;
-    }
-  };
 
   useEffect(() => {
     fetch("/data.json")
@@ -194,10 +217,18 @@ function App() {
       );
   }, []);
 
-  const pickRandomItem = () => {
-    if (data.length > 0) {
-      const randomIndex = Math.floor(Math.random() * data.length);
-      setRandomItem(data[randomIndex]);
+  const renderContent = () => {
+    switch (activeMenu) {
+      case "Notes":
+        return <Notes data={data} />;
+      case "Etudiants":
+        return <Etudiants data={data} />;
+      case "Matières":
+        return <Matieres data={data} />;
+      case "A propos":
+        return <APropos />;
+      default:
+        return null;
     }
   };
 
@@ -207,10 +238,6 @@ function App() {
       <Header />
       <MainContent />
       <div>{renderContent()}</div>
-      <button onClick={pickRandomItem} style={{ margin: "20px" }}>
-        Sélectionner un élément au hasard
-      </button>
-      <RandomItem item={randomItem} />
       <Footer />
     </>
   );
